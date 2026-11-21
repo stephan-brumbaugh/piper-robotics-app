@@ -1,0 +1,16 @@
+{
+  "name": "Piper Robotics Live",
+  "short_name": "Piper Live",
+  "description": "Schedules, results, rankings, streams and match videos for Piper Robotics teams",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1d1a14",
+  "theme_color": "#1d1a14",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

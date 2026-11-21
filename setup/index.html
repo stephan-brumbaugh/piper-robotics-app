@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Team setup</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../live/css/app.css">
+<style>
+  body { padding-bottom: 2rem; }
+  .teamrow { display: grid; grid-template-columns: 6rem 7rem 1fr 1fr 3.2rem 2.6rem; gap: .4rem; align-items: center; margin: .35rem 0; }
+  .teamrow input[type=color] { padding: 0; min-height: 44px; }
+  .teamhead { font-size: .75rem; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+  .keyrow { display: grid; grid-template-columns: 12rem 1fr 2.6rem; gap: .4rem; margin: .35rem 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+  .test li { margin: .25rem 0; }
+  @media (max-width: 760px) {
+    .teamrow { grid-template-columns: 1fr 1fr; padding: .5rem; border: 1px solid var(--line); border-radius: 10px; }
+    .teamhead { display: none; }
+    .keyrow, .grid2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar"><div class="brand"><span>Team setup</span></div></header>
+<main id="view">
+  <section class="card">
+    <h2>Team setup</h2>
+    <p>This page makes the <code>config.json</code> settings file that Piper Robotics Live (and later the scouting app) reads. Change anything below, tap <b>Download config.json</b>, then upload that file to the top folder of your GitHub repository, replacing the old one. Phones pick up the change the next time the app opens.</p>
+    <p class="banner warn">Everything here is public: anyone who opens your site can read this file. Only put in keys that are meant for websites (a Blue Alliance read key, a YouTube key locked to your site). Never put your FIRST API key or your scouting app's team key here.</p>
+    <p id="loadStatus" class="muted small">Loading the current settings…</p>
+  </section>
+
+  <section class="card">
+    <h2>Your program</h2>
+    <div class="grid2">
+      <label>Program name<input id="name" placeholder="e.g. Piper Robotics"></label>
+      <label>Parent app title (shown at the top of the app)<input id="liveTitle" placeholder="e.g. Piper Robotics Live"></label>
+    </div>
+    <label>Scouting app link (optional, shown on the home page)<input id="scoutUrl" placeholder="https://…"></label>
+  </section>
+
+  <section class="card">
+    <h2>Teams families can follow</h2>
+    <p class="muted small"><b>Names in video titles</b>: how the team is written in your YouTube titles, e.g. <i>Team Stealth</i> in "FTC Team Stealth Meet 2 Match 11". Separate more than one with commas.</p>
+    <div class="teamrow teamhead"><span>Program</span><span>Number</span><span>Name</span><span>Names in video titles</span><span>Colour</span><span></span></div>
+    <div id="teams"></div>
+    <button id="addTeam">+ Add a team</button>
+  </section>
+
+  <section class="card">
+    <h2>Live streams</h2>
+    <p class="muted small">Used when an event doesn't list its own stream. In Kansas and Missouri, FTC events stream on twitch.tv/firstmoks.</p>
+    <div class="grid2">
+      <label>FTC stream link<input id="streamFtc" placeholder="https://www.twitch.tv/…"></label>
+      <label>FRC stream link<input id="streamFrc" placeholder="https://www.twitch.tv/…"></label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>YouTube match videos</h2>
+    <div class="grid2">
+      <label>Channel (handle or link)<input id="ytChannel" placeholder="@YourChannel"></label>
+      <label>YouTube API key (lets the app find each match's video)<input id="ytKey" placeholder="AIza…" autocomplete="off" spellcheck="false"></label>
+    </div>
+    <p class="muted small">Without a key, each finished match gets a "Find video" button that searches your channel instead.</p>
+  </section>
+
+  <section class="card">
+    <h2>API keys</h2>
+    <label>The Blue Alliance read key (FRC results)<input id="tbaKey" autocomplete="off" spellcheck="false"></label>
+    <p class="muted small">Other keys, for future features:</p>
+    <div id="keys"></div>
+    <button id="addKey">+ Add a key</button>
+  </section>
+
+  <section class="card">
+    <h2>Seasons</h2>
+    <p class="muted small">Leave blank to follow the current season automatically (FTC switches in September, FRC in January).</p>
+    <div class="grid2">
+      <label>FTC season year (2026 = 2026–27)<input id="seasonFtc" inputmode="numeric"></label>
+      <label>FRC season year<input id="seasonFrc" inputmode="numeric"></label>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="btnrow">
+      <button id="test">Test the keys</button>
+      <button id="download" class="primary">Download config.json</button>
+    </div>
+    <ul id="testOut" class="test small"></ul>
+  </section>
+</main>
+
+<script type="module">
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const PALETTE = ['#7c3aed', '#0f9d8a', '#e8590c', '#d6336c', '#5c940d', '#0b7285', '#a35200', '#c2255c'];
+let cfg = { name: '', liveTitle: '', scoutUrl: '', teams: [], streams: {}, youtube: {}, keys: {}, seasons: {} };
+
+function teamRow(t, i) {
+  return `<div class="teamrow" data-i="${i}">
+    <select data-f="program"><option value="ftc" ${t.program === 'ftc' ? 'selected' : ''}>FTC</option><option value="frc" ${t.program === 'frc' ? 'selected' : ''}>FRC</option></select>
+    <input data-f="number" inputmode="numeric" value="${esc(t.number || '')}" placeholder="Number">
+    <input data-f="name" value="${esc(t.name || '')}" placeholder="Team name">
+    <input data-f="videoNames" value="${esc((t.videoNames || []).join(', '))}" placeholder="Team Stealth">
+    <input data-f="color" type="color" value="${esc(t.color || PALETTE[i % PALETTE.length])}">
+    <button class="ghost danger" data-del="${i}" title="Remove">✕</button>
+  </div>`;
+}
+function keyRow(k, v, i) {
+  return `<div class="keyrow" data-k="${i}"><input data-kf="name" value="${esc(k)}" placeholder="Key name"><input data-kf="value" value="${esc(v)}" placeholder="Value" autocomplete="off" spellcheck="false"><button class="ghost danger" data-kdel="${i}">✕</button></div>`;
+}
+function fill() {
+  $('#name').value = cfg.name || ''; $('#liveTitle').value = cfg.liveTitle || ''; $('#scoutUrl').value = cfg.scoutUrl || '';
+  $('#teams').innerHTML = (cfg.teams || []).map(teamRow).join('');
+  $('#streamFtc').value = (cfg.streams || {}).ftc || ''; $('#streamFrc').value = (cfg.streams || {}).frc || '';
+  $('#ytChannel').value = (cfg.youtube || {}).channel || ''; $('#ytKey').value = (cfg.youtube || {}).apiKey || '';
+  $('#tbaKey').value = (cfg.keys || {}).tba || '';
+  const other = Object.entries(cfg.keys || {}).filter(([k]) => k !== 'tba');
+  $('#keys').innerHTML = other.map(([k, v], i) => keyRow(k, v, i)).join('');
+  $('#seasonFtc').value = (cfg.seasons || {}).ftc || ''; $('#seasonFrc').value = (cfg.seasons || {}).frc || '';
+}
+function read() {
+  const teams = [...document.querySelectorAll('#teams .teamrow')].map(r => {
+    const g = f => r.querySelector(`[data-f="${f}"]`).value.trim();
+    return { program: g('program'), number: Number(g('number')) || 0, name: g('name'), videoNames: g('videoNames').split(',').map(x => x.trim()).filter(Boolean), color: g('color') };
+  }).filter(t => t.number);
+  const keys = { tba: $('#tbaKey').value.trim() };
+  for (const r of document.querySelectorAll('#keys .keyrow')) {
+    const k = r.querySelector('[data-kf="name"]').value.trim(), v = r.querySelector('[data-kf="value"]').value.trim();
+    if (k) keys[k] = v;
+  }
+  const yr = v => (Number(v) > 2000 ? Number(v) : null);
+  return {
+    name: $('#name').value.trim(), liveTitle: $('#liveTitle').value.trim() || `${$('#name').value.trim()} Live`, scoutUrl: $('#scoutUrl').value.trim(),
+    teams, streams: { ftc: $('#streamFtc').value.trim(), frc: $('#streamFrc').value.trim() },
+    youtube: { channel: $('#ytChannel').value.trim(), apiKey: $('#ytKey').value.trim() }, keys,
+    seasons: { ftc: yr($('#seasonFtc').value), frc: yr($('#seasonFrc').value) },
+  };
+}
+
+document.addEventListener('click', e => {
+  const d = e.target.closest('[data-del]');
+  if (d) { cfg = read(); cfg.teams.splice(Number(d.dataset.del), 1); fill(); return; }
+  const kd = e.target.closest('[data-kdel]');
+  if (kd) { kd.closest('.keyrow').remove(); return; }
+});
+$('#addTeam').onclick = () => { cfg = read(); cfg.teams.push({ program: 'ftc', number: '', name: '', videoNames: [], color: PALETTE[cfg.teams.length % PALETTE.length] }); fill(); };
+$('#addKey').onclick = () => { $('#keys').insertAdjacentHTML('beforeend', keyRow('', '', Date.now())); };
+$('#download').onclick = () => {
+  const c = read();
+  if (!c.teams.length) return alert('Add at least one team.');
+  const blob = new Blob([JSON.stringify(c, null, 2) + '\n'], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'config.json';
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  $('#testOut').innerHTML = '<li>Downloaded. Upload <b>config.json</b> to the top folder of your GitHub repository (Add file → Upload files), replacing the old one, then commit.</li>';
+};
+$('#test').onclick = async () => {
+  const c = read();
+  const out = [];
+  const say = () => { $('#testOut').innerHTML = out.map(x => `<li>${x}</li>`).join(''); };
+  out.push('Testing…'); say(); out.length = 0;
+  const ftc = c.teams.find(t => t.program === 'ftc'), frc = c.teams.find(t => t.program === 'frc');
+  if (ftc) {
+    try {
+      const r = await fetch('https://api.ftcscout.org/graphql', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: `{teamByNumber(number:${ftc.number}){name}}` }) });
+      const j = await r.json();
+      out.push(j.data && j.data.teamByNumber ? `✓ FTCScout found FTC ${ftc.number} ${esc(j.data.teamByNumber.name)}` : `✗ FTCScout doesn't know FTC ${ftc.number}`);
+    } catch (e) { out.push('✗ Couldn’t reach FTCScout: ' + esc(e.message)); }
+  }
+  if (frc) {
+    if (!c.keys.tba) out.push('✗ FRC teams need a Blue Alliance read key');
+    else try {
+      const r = await fetch(`https://www.thebluealliance.com/api/v3/team/frc${frc.number}/simple`, { headers: { 'X-TBA-Auth-Key': c.keys.tba } });
+      const j = r.ok ? await r.json() : null;
+      out.push(r.status === 401 ? '✗ The Blue Alliance rejected the read key' : j ? `✓ The Blue Alliance found FRC ${frc.number} ${esc(j.nickname)}` : `✗ The Blue Alliance returned HTTP ${r.status}`);
+    } catch (e) { out.push('✗ Couldn’t reach The Blue Alliance: ' + esc(e.message)); }
+  }
+  if (c.youtube.apiKey && c.youtube.channel) {
+    try {
+      const h = c.youtube.channel.replace(/^https?:\/\/(www\.)?youtube\.com\//, '').replace(/^@?/, '@');
+      const r = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&forHandle=${encodeURIComponent(h)}&key=${encodeURIComponent(c.youtube.apiKey)}`);
+      const j = await r.json();
+      out.push(j.error ? `✗ YouTube: ${esc(j.error.message)} (if it mentions referrers, the key only works from your published site)` : j.items && j.items[0] ? `✓ YouTube found the channel ${esc(j.items[0].snippet.title)}` : `✗ YouTube couldn't find ${esc(c.youtube.channel)}`);
+    } catch (e) { out.push('✗ Couldn’t reach YouTube: ' + esc(e.message)); }
+  } else out.push('· No YouTube key yet: matches will show "Find video" buttons');
+  say();
+};
+
+fetch('../config.json', { cache: 'no-cache' }).then(r => r.json()).then(c => {
+  cfg = c; fill(); $('#loadStatus').textContent = 'Loaded the current config.json.';
+}).catch(() => { fill(); $('#loadStatus').textContent = "Couldn't load config.json, so the form starts empty."; });
+window.__setup = { read };
+</script>
+</body>
+</html>

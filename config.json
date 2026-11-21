@@ -1,0 +1,17 @@
+{
+  "name": "Piper Robotics",
+  "liveTitle": "Piper Robotics Live",
+  "scoutUrl": "",
+  "teams": [
+    { "program": "ftc", "number": 21536, "name": "Team Stealth", "videoNames": ["Team Stealth"], "color": "#7c3aed" },
+    { "program": "ftc", "number": 14213, "name": "Nighthawks", "videoNames": ["Nighthawks"], "color": "#0f9d8a" },
+    { "program": "frc", "number": 1802, "name": "Team Stealth", "videoNames": ["Team Stealth"], "color": "#e8590c" }
+  ],
+  "streams": {
+    "ftc": "https://www.twitch.tv/firstmoks",
+    "frc": ""
+  },
+  "youtube": { "channel": "@PiperRobotics", "apiKey": "" },
+  "keys": { "tba": "gL1DOr0SKacCtpDNxQtXuPqtZToN8WtRO1q08Wlcc9bZlDqaoHAFKHIK0QSOOA7S" },
+  "seasons": { "ftc": null, "frc": null }
+}
