@@ -1,17 +1,49 @@
 {
   "name": "Piper Robotics",
   "liveTitle": "Piper Robotics Live",
-  "scoutUrl": "",
+  "scoutUrl": "https://stephan-brumbaugh.github.io/hive-scout/",
   "teams": [
-    { "program": "ftc", "number": 21536, "name": "Team Stealth", "videoNames": ["Team Stealth"], "color": "#7c3aed" },
-    { "program": "ftc", "number": 14213, "name": "Nighthawks", "videoNames": ["Nighthawks"], "color": "#0f9d8a" },
-    { "program": "frc", "number": 1802, "name": "Team Stealth", "videoNames": ["Team Stealth"], "color": "#e8590c" }
+    {
+      "program": "ftc",
+      "number": 21536,
+      "name": "Team Stealth",
+      "videoNames": [
+        "Team Stealth"
+      ],
+      "color": "#0037ff"
+    },
+    {
+      "program": "ftc",
+      "number": 14213,
+      "name": "Nighthawks",
+      "videoNames": [
+        "Nighthawks"
+      ],
+      "color": "#ff0000"
+    },
+    {
+      "program": "frc",
+      "number": 1802,
+      "name": "Team Stealth",
+      "videoNames": [
+        "Team Stealth"
+      ],
+      "color": "#7c3aed"
+    }
   ],
   "streams": {
     "ftc": "https://www.twitch.tv/firstmoks",
     "frc": ""
   },
-  "youtube": { "channel": "@PiperRobotics", "apiKey": "" },
-  "keys": { "tba": "gL1DOr0SKacCtpDNxQtXuPqtZToN8WtRO1q08Wlcc9bZlDqaoHAFKHIK0QSOOA7S" },
-  "seasons": { "ftc": null, "frc": null }
+  "youtube": {
+    "channel": "@PiperRobotics",
+    "apiKey": "AIzaSyAAQkxh-BVmbavwJOT0-AjkX9fTI9W97W4"
+  },
+  "keys": {
+    "tba": "gL1DOr0SKacCtpDNxQtXuPqtZToN8WtRO1q08Wlcc9bZlDqaoHAFKHIK0QSOOA7S"
+  },
+  "seasons": {
+    "ftc": null,
+    "frc": null
+  }
 }
